@@ -1,0 +1,146 @@
+{
+	"info": {
+		"_postman_id": "f42a3e81-9041-43ef-afb1-a1c73e58286f",
+		"name": "Newman - Jenkins",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Token  Genérico Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var  respuesta = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status 200\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"} );\r",
+							"\r",
+							"pm.test(\"Tiempo menor a 500ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							" pm.test(\"Token is not null\", () => {\r",
+							"    pm.expect(pm.response.token).is.not.null\r",
+							" } );\r",
+							"\r",
+							"\r",
+							"pm.environment.set(\"Token\", respuesta.response.token);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const dateNow = new Date();\r",
+							"pm.environment.set('hoy', dateNow.toISOString());\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"Username\": \"jonathan\",\r\n  \"Password\": \"jonathan\",\r\n  \"CountryId\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Testing}}/Token",
+					"host": [
+						"{{Testing}}"
+					],
+					"path": [
+						"Token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Factura B-CF Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"console.log(jsonData);\r",
+							"var Auth = pm.variables.get(\"Auth\");\r",
+							"var Test = pm.variables.get(\"Test\");\r",
+							"var fiscalDocument = jsonData.response.documents[0].fiscalData.fullNumber\r",
+							"var numberDocument = parseInt(fiscalDocument.substr(-8,8))\r",
+							"\r",
+							"\r",
+							"pm.test(\"Código 201\", function ()  { \r",
+							"    pm.expect(pm.response.code).to.be.oneOf([201, 200]);\r",
+							"\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Respuesta en menos de 5000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Autorización Válida\", function () {\r",
+							"        pm.expect(jsonData.response.documents[0].state.state).to.eql(Auth);\r",
+							"    });\r",
+							"    \r",
+							"pm.test(\"Punto de Venta Correcto\", function () {\r",
+							"        \r",
+							"        pm.expect(jsonData.response.documents[0].fiscalData.fiscalAuthorizationMode).to.eql(Test);\r",
+							"    });\r",
+							" \r",
+							"\r",
+							"\r",
+							"pm.environment.set(\"lastDocumentB\", numberDocument);\r",
+							"\r",
+							"\r",
+							"\r",
+							"var lastID = jsonData.response.documents[0].identifications.internalId;\r",
+							"pm.environment.set(\"lastIDB\", lastID);\r",
+							"\r",
+							"var lastID = jsonData.response.documents[0].identifications.internalId\r",
+							"pm.environment.set(\"pruebaComprobantes\", lastID);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n  {\r\n    \"header\": {\r\n      \"documentType\": 3,\r\n      \"documentGeneralType\": 1,\r\n      \"detail\": {\r\n        \"pos\": 407\r\n      },\r\n      \"Identification\": [\r\n\r\n                {\r\n                    \"ExternalSoftwareId\": 1,\r\n                    \"Code\": \"brasil2014\",\r\n                    \"Primary\": true\r\n                }\r\n            ],\r\n        \"receiver\": {\r\n        \"documentType\": 5,\r\n        \"documentNumber\": \"38891918\",\r\n        \"businessName\": \"PEREZ SANCHEZ, JUAN MANUEL.\",\r\n        \"taxTreatment\": 4\r\n      }\r\n    },\r\n        \"items\": [\r\n      {\r\n        \"Code\": {\r\n\t\t\t        \"CodeType\": {{CodeType}},\r\n\t\t\t        \"Code\": \"{{code}}\",\r\n\t\t\t        \"SoftwareId\": {{SoftwareId}}\r\n\t\t        },\r\n        \"quantity\": 1,\r\n        \"description\": \"Factura B-CF\",\r\n        \"price\": {\r\n          \"unitprice\": 13116\r\n        }\r\n      }\r\n    ]\r\n  }\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Testing}}/ElectronicDocument",
+					"host": [
+						"{{Testing}}"
+					],
+					"path": [
+						"ElectronicDocument"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
